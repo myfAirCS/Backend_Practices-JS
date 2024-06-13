@@ -27,6 +27,14 @@ const ordersSchema=new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Category"
     },
+<<<<<<< HEAD
+=======
+    status:{
+        type:String,
+        enum:["Pending","Available","Completed"],
+        default:"Pending"
+    }
+>>>>>>> 3a60a97 (First)
 
 },{timestamps:true})
 
