@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const productSchemaWithQuantity=new mongoose.Schema({
     productId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Products"
+        ref:'Products'
     },
     quantity:{
         type:Number
@@ -21,18 +21,18 @@ const ordersSchema=new mongoose.Schema({
     },
     customer:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
+        ref:'User'
     },
     category:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Category"
+        ref:'Category'
     },
 <<<<<<< HEAD
 =======
     status:{
         type:String,
-        enum:["Pending","Available","Completed"],
-        default:"Pending"
+        enum:['Pending','Available','Completed'],
+        default:'Pending'
     }
 >>>>>>> 3a60a97 (First)
 
