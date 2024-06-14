@@ -3,40 +3,8 @@ Always keep in mind that it can always cause an error so always use better appro
 try catch or Using Promises as they give us an option of resolve or reject which can be used to handle errors.
 
 2nd thing is that Database is always on another CONTINENT which means there could be a delay so whenever 
-making requests to DB always use ASYN/AWAIT.
+making requests to DB always use ASYNC/AWAIT.
 
-
-Certainly! Here are the reasons behind the best practices for database interactions:
----
- Reasons for Best Practices in Database Interactions
-
- Error Handling
-
-1. **Handling Unexpected Situations**: Database operations can fail due to network issues, incorrect data, or server-side errors. Proper error handling (try-catch or promises) ensures that your application can gracefully recover from these situations.
-
-2. **Debugging and Maintenance**: Implementing robust error handling allows you to log errors effectively. This helps in diagnosing issues during development and production, leading to quicker resolutions and improved application reliability.
-
-3. **User Experience**: By handling errors gracefully, you can provide users with meaningful error messages or alternative actions. This improves user experience by reducing frustration when something goes wrong.
-
-#### Asynchronous Operations
-
-1. **Non-Blocking Nature**: Asynchronous operations (`async/await`, promises) prevent blocking the Node.js event loop. This ensures that your application remains responsive and can handle multiple requests concurrently, enhancing scalability.
-
-2. **Readability and Maintainability**: `async/await` syntax makes asynchronous code more readable and easier to understand, especially when dealing with complex data flows or multiple database queries. This improves code maintainability over time.
-
-3. **Performance**: Asynchronous operations optimize performance by allowing your application to continue executing other tasks while waiting for database responses. This is crucial in distributed systems where database latency can vary.
-
-#### Considerations for Database Latency
-
-1. **Physical Distance**: Databases may be located on servers in different geographical regions or continents. This physical distance introduces network latency, affecting the speed of data retrieval and updates.
-
-2. **Asynchronous Techniques**: Using `async/await` or promises ensures that your application can efficiently handle latency by not blocking execution while waiting for database operations to complete.
-
-3. **User Perception**: Mitigating latency through asynchronous operations improves user perception of application responsiveness. Users experience quicker interaction with the application, even when dealing with remote databases.
-
----
-
-By adhering to these best practices, developers can build robust, responsive, and maintainable applications that effectively interact with databases. These practices not only enhance reliability and performance but also contribute to a positive user experience and simplify debugging during development.
 
 
 import mongoose from "mongoose";
@@ -63,3 +31,21 @@ const app = express();
     throw error;
   }
 })(); */
+
+For (.env)
+
+//This approach works but it doesn't keep consistency. As it causes mixture of ES6 and CommonJS ;
+// require("dotenv").config({ path: "./env" });
+
+So to counter it we have to add this to dev script:-
+"dev": "nodemon -r dotenv/config --experimental-json-modules /src/index.js"
+
+and use this in code 
+
+import dotenv from "dotenv";
+
+in Path We Give the Path of Enviroment Variables
+
+dotenv.config({
+  path: "./env",
+});

@@ -1,7 +1,12 @@
-import mongoose from "mongoose";
+//This approach works but it doesn't keep consistency. As it causes mixture of ES6 and CommonJS ;
+// require("dotenv").config({ path: "./env" });
+import dotenv from "dotenv";
 import express from "express";
-import { DB_NAME } from "./constant.js";
 import connectDB from "./DB/index.js";
+
+dotenv.config({
+  path: "./env",
+});
 
 const app = express();
 
