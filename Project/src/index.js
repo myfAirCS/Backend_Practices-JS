@@ -1,16 +1,21 @@
 //This approach works but it doesn't keep consistency. As it causes mixture of ES6 and CommonJS ;
-// require("dotenv").config({ path: "./env" });
+// require('dotenv').config({path: './env'})
 import dotenv from "dotenv";
-import express from "express";
-import connectDB from "./DB/index.js";
-
+import connectDB from "./db/index.js";
+import { app } from "./app.js";
 dotenv.config({
-  path: "./env",
+  path: "./.env",
 });
 
-const app = express();
-
-connectDB();
+connectDB()
+  .then(() => {
+    app.listen(process.env.PORT || 8000, () => {
+      console.log(`⚙️ Server is running at port : ${process.env.PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log("MONGO db connection failed !!! ", err);
+  });
 
 /* 1st and unprofessiomal approach to connect Database it causes Pollution in index.js file
  Using IFFE  Function .It excecutes itself while program starts without calling it
