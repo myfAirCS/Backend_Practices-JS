@@ -54,7 +54,7 @@ userSchema.methods.comparePassword = async function (password) {
 userSchema.methods.generateAccessToken = async function () {
   return (
     await jwt.sign({
-      id: this._id,
+      _id: this._id,
       fullName: this.fullName,
       avatar: this.avatar,
     }),
@@ -68,7 +68,7 @@ userSchema.methods.generateAccessToken = async function () {
 userSchema.methods.generateRefreshToken = async function () {
   return await jwt.sign(
     {
-      id: this.id,
+      _id: this._id,
     },
     process.env.REFRESH_WEB_TOKEN,
     {
