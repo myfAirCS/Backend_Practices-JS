@@ -3,6 +3,7 @@ import { apiErrors } from "../utils/apiErrors.js";
 import { User } from "../models/user.models.js";
 import { uploadOnCloudinary } from "../utils/fileUpload(Cloudinary).utils.js";
 import { apiResponse } from "../utils/apiResponse.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   const user = await User.findById(userId);
@@ -110,6 +111,7 @@ const loginUser = asyncHandler(async (req, res) => {
   //end
 });
 
+//To LogOut User
 const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
@@ -135,4 +137,56 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new apiResponse("User Logged Out", 200, {}));
 });
 
-export { registerUser, loginUser, logoutUser };
+// To regenerateAccessToken
+
+const regenerateAccessTokenAndRefreshToken = asyncHandler(async (req, res) => {
+  const incomingToken =
+    req.cookies.refreshToken || req.body.cookies.refreshToken;
+
+  if (!incomingToken) throw new apiErrors(402, "Invalid Token");
+
+  try {
+    const decodedToken = jwt.verify(
+      incomingToken,
+      process.env.REFRESH_WEB_TOKEN
+    );
+
+    if (!decodedToken) throw new apiErrors(402, "Invalid Refresh Token");
+
+    const user = await User.findById(decodedToken._id);
+
+    if (!user) throw new apiErrors(404, "Invalid Refresh Token");
+
+    if (user.refreshToken !== decodedToken)
+      throw new apiErrors(406, "Tokens Doesn't Matched");
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+      user._id
+    );
+
+    options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    res
+      .status(200)
+      .cookie("AccessToken", accessToken, options)
+      .cookie("RefreshToken", refreshToken, options)
+      .json(
+        new apiResponse("Cookies Refreshed", 200, {
+          accessToken,
+          refreshToken,
+        })
+      );
+  } catch (error) {
+    throw new apiErrors(400, error?.message || "Invalid Token");
+  }
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  regenerateAccessTokenAndRefreshToken,
+};
