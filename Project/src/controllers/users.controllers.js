@@ -204,9 +204,88 @@ const updatePassword = asyncHandler(async () => {
   //end
 });
 
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  const { fullName, email } = req.body;
+
+  if (!fullName || !email) throw new apiErrors(402, "All fields are Required");
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        fullName: fullName,
+        email: email,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password -refreshToken");
+
+  if (!user) throw new apiErrors(400, "Failed To Upload");
+
+  res
+    .status(200)
+    .json(new apiResponse("Details Updated Successfully", 200, user));
+});
+
+const updateAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.file?.path;
+  if (!avatarLocalPath) throw new apiErrors(404, "File Not Found");
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+  if (!avatar) throw new apiErrors(402, "Error While Uploading");
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        avatar: avatar.url,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password -refreshToken");
+
+  res
+    .status(200)
+    .json(new apiResponse("Image Uploaded Successfully", 200, user));
+});
+
+const updateCoverImage = asyncHandler(async (req, res) => {
+  const coverImageLocalPath = req.file?.path;
+  if (!coverImageLocalPath) throw new apiErrors(404, "File Not Found");
+
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+  if (!avatar) throw new apiErrors(402, "Error While Uploading");
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        coverImage: coverImage.url,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password -refreshToken");
+
+  res
+    .status(200)
+    .json(new apiResponse("Image Uploaded Successfully", 200, user));
+});
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   regenerateAccessTokenAndRefreshToken,
+  updatePassword,
+  updateAccountDetails,
+  updateAvatar,
+  updateCoverImage,
 };
