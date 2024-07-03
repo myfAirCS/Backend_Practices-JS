@@ -182,6 +182,26 @@ const regenerateAccessTokenAndRefreshToken = asyncHandler(async (req, res) => {
   } catch (error) {
     throw new apiErrors(400, error?.message || "Invalid Token");
   }
+  //end
+});
+
+const updatePassword = asyncHandler(async () => {
+  const { oldPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  if (!user.comparePassword(oldPassword))
+    throw new apiErrors(402, "Old Password Doesn't Match");
+
+  user.password = newPassword;
+
+  await user.save({ validateBeforeSave: false });
+
+  res
+    .status(200)
+    .json(new apiResponse("Password Chnaged Successfully", 200, {}));
+
+  //end
 });
 
 export {
