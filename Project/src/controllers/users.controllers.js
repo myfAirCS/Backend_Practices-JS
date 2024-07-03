@@ -4,6 +4,17 @@ import { User } from "../models/user.models.js";
 import { uploadOnCloudinary } from "../utils/fileUpload(Cloudinary).utils.js";
 import { apiResponse } from "../utils/apiResponse.js";
 
+const generateAccessAndRefreshTokens = async (userId) => {
+  const user = await User.findById(userId);
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+
+  user.refreshToken = refreshToken;
+  user.save({ validateBeforeSave: false });
+
+  return { accessToken, refreshToken };
+};
+
 const registerUser = asyncHandler(async (req, res) => {
   // Get Data from Frontend or USer
   // Check Validation and if any field is empty
@@ -58,9 +69,46 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new apiErrors(500, "Failed To Register User");
   }
 
+  //end
+
   return res
     .status(200)
     .json(new apiResponse("User Created Successfully", 200, createdUser));
 });
 
-export { registerUser };
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, username, password } = req.body;
+
+  if (!email && !username)
+    throw new apiErrors(400, "Email or Username is required ");
+
+  const user = await User.findOne({
+    $or: [{ email }, { username }],
+  });
+
+  if (!user) throw new apiErrors(404, "User doesn't exist");
+
+  const isPasswordValid = await user.comparePassword(password);
+
+  if (!isPasswordValid) throw new apiErrors(401, "Password Incorrect");
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  res
+    .status(200)
+    .cookies("AccessToken", accessToken, options)
+    .cookies("RefreshToken", refreshToken, options);
+
+  //end
+});
+
+const logoutUser = asyncHandler(async (req, res) => {});
+
+export { registerUser, loginUser };
