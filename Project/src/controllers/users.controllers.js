@@ -76,10 +76,11 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new apiResponse("User Created Successfully", 200, createdUser));
 });
 
+//LogInMethod
 const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
 
-  if (!email && !username)
+  if (!(email || username))
     throw new apiErrors(400, "Email or Username is required ");
 
   const user = await User.findOne({
@@ -103,12 +104,35 @@ const loginUser = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .cookies("AccessToken", accessToken, options)
-    .cookies("RefreshToken", refreshToken, options);
+    .cookie("AccessToken", accessToken, options)
+    .cookie("RefreshToken", refreshToken, options);
 
   //end
 });
 
-const logoutUser = asyncHandler(async (req, res) => {});
+const logoutUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        refreshToken: undefined,
+      },
+    },
+    {
+      new: true,
+    }
+  );
 
-export { registerUser, loginUser };
+  options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  res
+    .status(200)
+    .clearCookie("AccessToken", options)
+    .clearCookie("RefreshToken", options)
+    .json(new apiResponse("User Logged Out", 200, {}));
+});
+
+export { registerUser, loginUser, logoutUser };
